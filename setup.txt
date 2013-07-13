@@ -1,0 +1,45 @@
+
+==================================================
+ 環境構築手順
+==================================================
+
+1. Ruby, MySQL をインストール
+---------------------------------------------
+http://qiita.com/items/c9f3d8ca69a4ab0b27cb
+
+
+2. MySQLに、データベースを作成
+---------------------------------------------
+mysql> create table notifications ( id INT UNSIGNED NOT NULL AUTO_INCREMENT, map_id INT UNSIGNED NOT NULL, lat DOUBLE, lng DOUBLE, message VARCHAR(255), created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, PRIMARY KEY(id));
+
+mysql> create table maps ( id INT UNSIGNED NOT NULL AUTO_INCREMENT, user_id INT UNSIGNED NOT NULL, public_id VARCHAR(255) NOT NULL UNIQUE, name VARCHAR(20) NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, PRIMARY KEY(id));
+
+mysql> create table users ( id INT UNSIGNED NOT NULL AUTO_INCREMENT, type INT UNSIGNED NOT NULL, device_id VARCHAR(100) UNIQUE NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, PRIMARY KEY(id));
+
+
+3. database.yml を設定する
+---------------------------------------------
+database.yml の "username", "password" に、MySQLのusername, password の値を設定する。
+
+
+4. bundle install をする
+---------------------------------------------
+bundle install --path vendor/bundle
+
+
+5. config/config_dev.yml を設定する
+---------------------------------------------
+"certificate" に、 .pemファイルのパスを、 "pass" にそのパスワードを設定する。
+本番用の環境を構築する場合は、config_production.yml を編集する。
+開発環境と本番環境で、使用する .pemファイルは異なる。
+
+
+6. 実行する
+---------------------------------------------
+bundle exec rackup -E production -p 4567 -D
+
+-E: 環境
+-p: 使用するポート番号を指定
+-D: バックグラウンドで実行
+
+終わり。

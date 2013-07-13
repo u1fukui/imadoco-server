@@ -1,0 +1,4 @@
+apn:
+ certificate: keypath
+ pass: password
+
