@@ -1,82 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Cache-Control" content="no-cache">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <!-- Responsive -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+    
+  <!-- Bootstrap -->
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom -->
+  <link href="/css/main.css" rel="stylesheet">
+  <link href="/css/map.css" rel="stylesheet">
+
+  <!-- Google Maps -->
   <script type="text/javascript"
            src="http://maps.google.com/maps/api/js?sensor=false"></script>
-  <style type="text/css">
-        html {
-            margin: 0px;
-            padding: 0px;
-            height: 100%;
-        }
-        body {
-            margin: 0px;
-            padding: 0px;
-            height: 100%;
-        }
-        #map-canvas {
-            width: 100%;
-            height: 50%;
-        }
-    </style>
 </head>
 <body>
-  <div id="map-canvas"></div>
-  <div>1. まずは位置情報を取得！</div>
-  <input type="button" value="居場所を取得" onclick="getPosition()" />
-  <br><br>
-  <div>2. 次にメッセージを添えて相手に教えよう♪</div>
-  <form method="POST" action="/position">
-    <input type="hidden" name="lat" id="lat">
-    <input type="hidden" name="lng" id="lng">
-    <input type="hidden" name="key" value="<%= @key %>">
-    <input type="text" name="message" value="" style="width: 90%;">
-    <input type="submit" value="居場所を教える">
-  </form>
-  <script type="text/javascript">
-    function getPosition() {
-      // 対応してるかチェック
-      if (navigator.geolocation == undefined) {
-        alert("位置情報の取得に未対応です。");
-        return;
-      }
- 
-      // 位置情報の取得
-      navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
- 
-      // 成功したとき
-      function successCallback(position) {
-        var lat = position.coords.latitude;
-        var lng = position.coords.longitude;
-        initializeMap(lat, lng)
+  <!-- ナビゲーション -->
+  <div class="navbar navbar-static-top">
+    <div class="navbar-inner">
+      <div class="container-fluid">
+        <div class="row-fluid">
+          <div class="nav-collapse collapse span11 offset1">
+            <ul class="nav" href="#">
+              <li><a class="brand" href="#">imadoco?</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        var inputLat = document.getElementById("lat");
-        inputLat.setAttribute("value", lat);        
+  <div class="container-fluid centering">
+    <div class="row-fluid">
+      <div id="map-canvas"></div>
+      <div>1. まずは位置情報を取得！</div>
+      <input type="button" value="居場所を取得" onclick="getPosition()" />
+      <br><br>
+      <div>2. 居場所がずれてたら地図をタップして修正してね
+      <br><br>
+      <div>3. 次にメッセージを添えて相手に教えよう♪</div>
+      <form method="POST" action="/position">
+        <input type="hidden" name="lat" id="lat">
+        <input type="hidden" name="lng" id="lng">
+        <input type="hidden" name="key" value="<%= @key %>">
+        <input type="text" name="message" placeholder="メッセージをここに入力"  value="" style="width: 90%;">
+        <input type="submit" value="居場所を教える">
+      </form>
+    </div>
+  </div>
 
-        var inputLng = document.getElementById("lng");
-        inputLng.setAttribute("value", lng);
-
-      }
- 
-      // 失敗したとき
-      function errorCallback(err) {
-        alert("位置情報の取得に失敗しました(" + err.code + ")" + err.message)
-      }
-
-      function initializeMap(lat, lng) {
-        var latlng = new google.maps.LatLng(lat, lng);
-        var myOptions = {
-          zoom: 16,
-          center: latlng,
-          mapTypeId: google.maps.MapTypeId.ROADMAP
-        };
-        mapCanvas = new google.maps.Map(document.getElementById("map-canvas"), myOptions);
-      }
-    };
-  </script>
+  <!-- Bootstrap -->
+  <script src="http://code.jquery.com/jquery.js"></script>
+  <script src="/js/bootstrap.min.js"></script>
+  
+  <!-- Map -->
+  <script src="/js/map.js"></script>
 </body>
 </html>
