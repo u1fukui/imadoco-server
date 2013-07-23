@@ -10,6 +10,9 @@ enable :logging, :dump_errors
 # データベース
 ActiveRecord::Base.configurations = YAML.load_file('database.yml')
 ActiveRecord::Base.establish_connection('development')
+Time.zone = 'Tokyo'
+ActiveRecord::Base.time_zone_aware_attributes = true
+ActiveRecord::Base.default_timezone = :local
 
 class User < ActiveRecord::Base
   has_many :maps
