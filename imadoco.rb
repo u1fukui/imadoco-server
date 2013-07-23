@@ -1,8 +1,9 @@
 # coding:utf-8
 require 'sinatra/base'
+require 'openssl'
 
 class ImadocoApp < Sinatra::Base
- 
+
   # 開発用設定
   configure :development do
     config = YAML.load_file("config/config_dev.yml")
@@ -10,15 +11,20 @@ class ImadocoApp < Sinatra::Base
     @@APN = Houston::Client.development
     @@APN.certificate = File.read(config['apn']['certificate'])
     @@APN.passphrase = config['apn']['pass']
+
+    @@decript_key = config['decrypt_key']
   end
 
   # 本番用設定
   configure :production do
     config = YAML.load_file("config/config_production.yml")
 
-    @@APN = Houston::Client.production
+    #@@APN = Houston::Client.production
+    @@APN = Houston::Client.development
     @@APN.certificate = File.read(config['apn']['certificate'])
     @@APN.passphrase = config['apn']['pass']
+
+    @@decript_key = config['decrypt_key']
   end
  
   # 指定された端末にpush通信を送る
@@ -36,24 +42,54 @@ class ImadocoApp < Sinatra::Base
     @@APN.push(notification)
   end
 
+  # 復号処理
+  def decrypt(base64_text)
+    
+    s = base64_text.unpack('m')[0]
+
+    dec = OpenSSL::Cipher::Cipher.new('AES-256-CBC') 
+    dec.decrypt
+    dec.key = @@decript_key
+    dec.iv = "\000"*32
+    a = dec.update(s)
+    b = dec.final
+    
+    return a + b
+  end
+
+  # 引数の数値を桁数にしたランダムな文字列を生成
+  def create_random_string(num)
+    return [*1..9, *'A'..'Z', *'a'..'z'].sample(num).join
+  end
+
+  # 無効なユーザかを判定
+  def is_invalid_user(user_id, cookie)
+    user = User.find_by_id_and_cookie(user_id, cookie)
+    return user.nil?
+  end
+
   # 端末の登録
   post '/device.json' do
     reqData = JSON.parse(request.body.read.to_s)
+    device_id = decrypt(reqData['device_id'])
+    user = User.find_by_device_id(device_id)
 
-    user = User.find_by_device_id(reqData['device_id'])
+    request.cookies['foo']
+
 
     #  存在しない場合は登録
     if user.nil? then
       user = User.new
-      user.device_id = reqData['device_id']
+      user.device_id = device_id
       user.device_type = reqData['device_type']
+      user.cookie = create_random_string(28)
       user.save
     end
 
     # userIdを返す
     content_type :json, :charset => 'utf-8'
     status 202
-    {user_id: user.id}.to_json 
+    {user_id: user.id, cookie: user.cookie}.to_json 
   
   end
 
@@ -63,7 +99,14 @@ class ImadocoApp < Sinatra::Base
     user_id = reqData['user_id']
     name = reqData['name']
     
-    public_id = [*1..9, *'A'..'Z', *'a'..'z'].sample(12).join
+    # ユーザ確認
+    cookie = request.cookies['user_cookie']
+    if is_invalid_user(user_id, cookie) then
+      status 401
+      return
+    end
+
+    public_id = create_random_string(12)
     
     map = Map.new
     map.user_id = user_id
@@ -113,13 +156,21 @@ class ImadocoApp < Sinatra::Base
  
     pushNotification(user.device_id, notification.id)    
 
-    "thank you"
+    erb :thanks
   end
 
   # 居場所情報の取得
   get '/notifications/:uid' do
     user_id = params[:uid]
-    
+
+    # ユーザ確認
+    cookie = request.cookies['user_cookie']
+    if is_invalid_user(user_id, cookie) then
+      status 401
+      return
+    end
+
+   
     content_type :json, :charset => 'utf-8'
 
     notifications = Map.joins(:notifications).select("notifications.id, maps.name, notifications.lat, notifications.lng, notifications.message, notifications.created_at").where(:user_id => user_id).order("notifications.id DESC")

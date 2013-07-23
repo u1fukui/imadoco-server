@@ -13,7 +13,6 @@
 
   <!-- Custom -->
   <link href="/css/main.css" rel="stylesheet">
-  <link href="/css/map.css" rel="stylesheet">
 
   <!-- Google Maps -->
   <script type="text/javascript"
@@ -37,28 +36,14 @@
 
   <div class="container-fluid centering">
     <div class="row-fluid">
-      <div id="map-canvas"></div>
-      <div>1. まずは位置情報を取得！</div>
-      <input type="button" value="居場所を取得" onclick="getPosition()" />
-      <br><br>
-      <div>2. 居場所がずれてたら地図をタップして修正してね
-      <br><br>
-      <div>3. 次にメッセージを添えて相手に教えよう♪</div>
-      <form method="POST" action="/position">
-        <input type="hidden" name="lat" id="lat">
-        <input type="hidden" name="lng" id="lng">
-        <input type="hidden" name="key" value="<%= @key %>">
-        <input type="text" name="message" placeholder="メッセージをここに入力"  value="" style="width: 90%;">
-        <input type="submit" value="居場所を教える">
-      </form>
+      <h2>Thank you!</h2>
+      <p>位置情報をメール送信者へ通知しました。</p>
     </div>
   </div>
 
   <!-- Bootstrap -->
   <script src="http://code.jquery.com/jquery.js"></script>
   <script src="/js/bootstrap.min.js"></script>
-  
-  <!-- Map -->
-  <script src="/js/map.js"></script>
+
 </body>
 </html>

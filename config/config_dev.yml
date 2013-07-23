@@ -2,3 +2,4 @@ apn:
  certificate: keypath
  pass: password
 
+decrypt_key: key
